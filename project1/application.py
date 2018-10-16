@@ -11,6 +11,7 @@ from sqlalchemy.orm import scoped_session, sessionmaker
 from werkzeug.exceptions import default_exceptions
 from werkzeug.security import check_password_hash, generate_password_hash
 
+from bs4 import BeautifulSoup
 
 from helpers import login_required, apology
 
@@ -170,14 +171,33 @@ def register():
 def api_isbn(isbn):
     try:
         res = requests.get(
-            "https://www.goodreads.com/book/review_counts.json",
+            "https://www.goodreads.com/search/index.xml",
             params={
                 "key": GOODREADS_API_KEY,
-                "isbns": isbn
+                "q": str(isbn)
             }
         )
+        # turn response in beautiful soup object for xml parsing
+        soup = BeautifulSoup(res.content)
+
+        # parse xml for required elements
+        title = soup.find('title').string
+        author = soup.author.find('name').string
+        year = soup.find('original_publication_year').string
+        reviews_count = soup.find('text_reviews_count').string
+        average_rating = soup.find('average_rating').string
+
+        # json_dict
+        json_dict = {
+            'title': title,
+            'author': author,
+            'year': year,
+            'isbn': isbn,
+            'review_count': reviews_count,
+            'average_rating': average_rating
+        }
         if res.status_code == 200:
-            return jsonify(res.json())
+            return jsonify(json_dict)
         else:
             return apology("No results returned for ISBN {}".format(isbn))
     except:
