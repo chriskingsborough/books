@@ -1,0 +1,21 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Books
+{% endblock %}
+
+{% block main %}
+    <main class="container p-5">
+        {% with messages = get_flashed_messages() %}
+        {% endwith %}
+        <h1>
+            Find a book:
+        </h1>
+    </main>
+    <form action="/" method="post">
+        <div class="form-group">
+            <input autocomplete="off" autofocus class="form-control" name="search" placeholder="Title, Author, ISBN" type="text"/>
+        </div>
+        <button class="btn btn-primary" type="submit">Search</button>
+    </form>
+{% endblock %}

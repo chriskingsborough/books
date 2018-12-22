@@ -13,7 +13,7 @@ from werkzeug.security import check_password_hash, generate_password_hash
 
 from bs4 import BeautifulSoup
 
-from helpers import login_required, apology
+from helpers import login_required, apology, fetch_books
 
 app = Flask(__name__)
 
@@ -36,10 +36,27 @@ engine = create_engine(os.getenv("DATABASE_URL"))
 db = scoped_session(sessionmaker(bind=engine))
 
 
-@app.route("/")
+@app.route("/", methods=['GET', 'POST'])
 @login_required
 def index():
-    return "Project 1: TODO"
+
+    if request.method == "POST":
+        # get book
+        search = request.form.get('search')
+        books, keys = fetch_books(search)
+        # handle scenario where no results
+        if len(books) > 0:
+            return render_template(
+                'books.html',
+                books=books,
+                search_param=search)
+        else:
+            flash("No results found for '{}'".format(search))
+            return render_template(
+                'index.html'
+            )
+    else:
+        return render_template('index.html')
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
@@ -202,3 +219,6 @@ def api_isbn(isbn):
             return apology("No results returned for ISBN {}".format(isbn))
     except:
         return apology("No results returned for ISBN {}".format(isbn))
+
+if __name__ == '__main__':
+    app.run()
