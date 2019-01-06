@@ -1,0 +1,84 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Book
+{% endblock %}
+
+{% block main %}
+
+    <h1>{{title}}</h1>
+
+    <table class="table ">
+        <tbody>
+            <tr>
+                <td>
+                    Author
+                </td>
+                <td>
+                    {{author}}
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    Year
+                </td>
+                <td>
+                    {{year}}
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    ISBN
+                </td>
+                <td>
+                    {{isbn}}
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    Rating
+                </td>
+                <td>
+                    {{rating}}
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    Number of Reviews
+                </td>
+                <td>
+                    {{number_reviews}}
+                </td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h3>Submit Review</h3>
+
+    <form action="/book/{{isbn}}" method="POST">
+
+    <div class="form-group shadow-textarea">
+      <textarea class="form-control z-depth-1" id="review" name="review" rows="3" placeholder="Start a review..."></textarea>
+    </div>
+    <label for="rating">Rating</label>
+    <select class="form-control" id="rating" name="rating">
+      <option>1</option>
+      <option>2</option>
+      <option>3</option>
+      <option>4</option>
+      <option>5</option>
+    </select>
+    <br />
+    <button class="btn btn-primary" type="submit">Submit</button>
+    </form>
+
+    <br />
+    <h3>Reviews</h3>
+    {% for review in reviews %}
+        <p>
+            Rating: {{review[0]}}<br />
+            {{review[1]}}
+        </p>
+    {% endfor %}
+    </table>
+{% endblock %}

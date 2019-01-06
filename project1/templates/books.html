@@ -6,12 +6,15 @@
 
 {% block main %}
 
+    <h1>Find a Book</h1>
     <form action="/" method="post">
         <div class="form-group">
             <input autocomplete="off" autofocus class="form-control" name="search" value="{{search_param}}" type="text"/>
         </div>
         <button class="btn btn-primary" type="submit">Search</button>
     </form>
+
+    <h1>Results</h1>
 
     <table class="table table-striped">
         <thead>
@@ -25,10 +28,10 @@
         <tbody>
             {% for row in books %}
                 <tr>
-                    <td>{{ row[0] }}</td>
-                    <td>{{ row[1] }}</td>
-                    <td>{{ row[2] }}</td>
-                    <td>{{ row[3] }}</td>
+                    <td><a href="{{url_for('book', isbn=row[0])}}">{{ row[0] }}</a></td>
+                    <td><a href="{{url_for('book', isbn=row[0])}}">{{ row[1] }}</a></td>
+                    <td><a href="{{url_for('book', isbn=row[0])}}">{{ row[2] }}</a></td>
+                    <td><a href="{{url_for('book', isbn=row[0])}}">{{ row[3] }}</a></td>
                 </tr>
             {% endfor %}
         </tbody>

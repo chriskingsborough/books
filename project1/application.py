@@ -13,6 +13,8 @@ from werkzeug.security import check_password_hash, generate_password_hash
 
 from bs4 import BeautifulSoup
 
+import requests
+
 from helpers import login_required, apology, fetch_books
 
 app = Flask(__name__)
@@ -95,6 +97,7 @@ def login():
         return render_template("login.html")
 
 @app.route("/logout")
+@login_required
 def logout():
     """Log user out"""
 
@@ -179,12 +182,66 @@ def register():
 
             # Remember which user has logged in
             session["user_id"] = rows[0]["id"]
+
             return redirect("/")
 
     return apology("Unable to Register")
 
+@app.route("/book/<isbn>", methods=["GET", "POST"])
+@login_required
+def book(isbn):
+
+    if request.method == 'POST':
+        # get values from POST request
+        review = request.form.get("review")
+        rating = request.form.get("rating")
+
+        insert_review_query = """
+        INSERT INTO reviews (isbn, user_id, rating, review)
+        VALUES
+        (:isbn, :user_id, :rating, :review)
+        """
+
+        db.execute(
+            insert_review_query,
+            {
+                'isbn': isbn,
+                'user_id': session.get("user_id"),
+                'rating':rating,
+                'review':review
+            }
+        )
+        db.commit()
+
+        return redirect("/book/{}".format(isbn))
+    else:
+        # get book attributes
+        resp = api_isbn(isbn).get_json()
+
+        select_query = """
+        SELECT rating, review
+        FROM reviews
+        WHERE isbn = '{isbn}'
+        ORDER BY date DESC
+        """.format(isbn=isbn)
+
+        reviews = db.execute(select_query)
+
+        return render_template(
+            "book.html",
+            title=resp['title'],
+            author=resp['author'],
+            rating=resp['average_rating'],
+            year=resp['year'],
+            isbn=resp['isbn'],
+            number_reviews=resp['review_count'],
+            reviews=reviews
+        )
+
+
+
 @app.route("/api/<isbn>", methods=["GET"])
-# @login_required
+@login_required
 def api_isbn(isbn):
     try:
         res = requests.get(
